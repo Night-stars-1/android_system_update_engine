@@ -76,10 +76,12 @@ class SideloadDaemonState : public DaemonStateInterface,
           "ui_print Step %d/2", status == UpdateStatus::DOWNLOADING ? 1 : 2));
       ReportStatus(android::base::StringPrintf("progress 0.5 0"));
     }
-    if (status_ != status || fabs(progress - progress_) > 0.005) {
-      ReportStatus(android::base::StringPrintf("set_progress %.lf", progress));
+    if (status_ != status || fabs(progress - progress_) >= 0.001 ||
+        (progress == 1.0 && progress_ != 1.0)) {
+      ReportStatus(android::base::StringPrintf("set_progress %.6f", progress));
+      // Compare with the last emitted value, so small callbacks accumulate.
+      progress_ = progress;
     }
-    progress_ = progress;
     status_ = status;
   }
 
